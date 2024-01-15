@@ -10,11 +10,11 @@ type uRepository struct {
 	q *db.Queries
 }
 
-type UserI interface {
+type RUserI interface {
 	ListAllUsers() ([]db.ListUsersRow, error)
 }
 
-func NewRepository(q *db.Queries) UserI {
+func NewRepository(q *db.Queries) RUserI {
 	return &uRepository{
 		q: q,
 	}

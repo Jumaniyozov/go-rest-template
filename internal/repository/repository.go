@@ -1,13 +1,11 @@
 package repository
 
 import (
-	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository/user"
 )
 
 type RepositoryI interface {
-	UserRepository() UserI
-}
-
-type UserI interface {
-	ListAllUsers() ([]db.ListUsersRow, error)
+	UserRepository() user.UserI
+	AuthRepository() auth.AuthI
 }

@@ -6,6 +6,8 @@ import (
 )
 
 func InternalErrorMessage(w http.ResponseWriter, err error, logger *zerolog.Logger) {
-	logger.Error().Err(err).Msg("Error while writing response")
+	if logger != nil {
+		logger.Error().Err(err).Msg("Error while writing response")
+	}
 	http.Error(w, "error trying to send json", http.StatusInternalServerError)
 }
