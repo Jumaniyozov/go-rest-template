@@ -2,21 +2,18 @@ package auth
 
 import (
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
-	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
+	"github.com/Jumaniyozov/go-rest-template/internal/contracts/repository"
+	"github.com/Jumaniyozov/go-rest-template/internal/models"
 	"github.com/rs/zerolog"
 )
 
 type authService struct {
 	cfg  *config.Config
 	log  *zerolog.Logger
-	repo auth.RAuthI
+	repo repository.AuthI
 }
 
-type AuthServiceI interface {
-	GetAllPermissions(userID int) ([]auth.Permissions, error)
-}
-
-func NewService(c *config.Config, l *zerolog.Logger, r auth.RAuthI) AuthServiceI {
+func NewService(c *config.Config, l *zerolog.Logger, r repository.AuthI) repository.AuthI {
 	return &authService{
 		cfg:  c,
 		log:  l,
@@ -24,7 +21,7 @@ func NewService(c *config.Config, l *zerolog.Logger, r auth.RAuthI) AuthServiceI
 	}
 }
 
-func (u *authService) GetAllPermissions(userID int) ([]auth.Permissions, error) {
+func (u *authService) GetAllPermissions(userID int) ([]models.Permissions, error) {
 	permissions, err := u.repo.GetAllPermissions(userID)
 	if err != nil {
 		return nil, err

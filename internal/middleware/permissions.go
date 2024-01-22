@@ -1,14 +1,14 @@
 package middlewares
 
 import (
-	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
-	service "github.com/Jumaniyozov/go-rest-template/internal/services"
+	contractService "github.com/Jumaniyozov/go-rest-template/internal/contracts/service"
+	"github.com/Jumaniyozov/go-rest-template/internal/models"
 	"github.com/Jumaniyozov/go-rest-template/pkg/response"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
-func PermissionsInclude(code string, p []auth.Permissions) bool {
+func PermissionsInclude(code string, p []models.Permissions) bool {
 
 	for _, val := range p {
 		if code == val.Permission {
@@ -18,7 +18,7 @@ func PermissionsInclude(code string, p []auth.Permissions) bool {
 	return false
 }
 
-func RequirePermission(h httprouter.Handle, requiredPermission string, srv service.ServiceI) httprouter.Handle {
+func RequirePermission(h httprouter.Handle, requiredPermission string, srv contractService.ServiceI) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		user := r.Context().Value(AuthorizationPayloadKey)
 

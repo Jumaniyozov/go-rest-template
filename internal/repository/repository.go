@@ -1,11 +1,10 @@
 package repository
 
 import (
-	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
-	"github.com/Jumaniyozov/go-rest-template/internal/repository/user"
+	"github.com/Jumaniyozov/go-rest-template/internal/contracts/repository"
 )
 
 type RepositoryI interface {
-	UserRepository() user.UserI
-	AuthRepository() auth.AuthI
+	UserRepository() repository.UserI
+	AuthRepository() repository.AuthI
 }

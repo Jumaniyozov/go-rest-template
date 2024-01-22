@@ -2,7 +2,7 @@ package rest
 
 import (
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
-	service "github.com/Jumaniyozov/go-rest-template/internal/services"
+	contractService "github.com/Jumaniyozov/go-rest-template/internal/contracts/service"
 	"github.com/rs/zerolog"
 )
 
@@ -16,7 +16,7 @@ type Handler struct {
 func NewHandler(
 	cfg *config.Config,
 	log *zerolog.Logger,
-	service service.ServiceI,
+	service contractService.ServiceI,
 ) *Handler {
 	sh := &swaggerHandler{}
 	uh := &userHandler{
