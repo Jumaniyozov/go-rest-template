@@ -31,7 +31,7 @@ func StartApp() {
 	services := service.NewService(cfg, logger, rep)
 
 	// Initializing and setting up router
-	router := SetupoRouter(cfg, logger, services)
+	router := SetupRouter(cfg, logger, services)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.ServerPort),

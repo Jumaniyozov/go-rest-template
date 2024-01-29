@@ -4,4 +4,5 @@ type Message struct {
 	Message string `json:"message"`
 	Code    int    `json:"code"`
 	Data    any    `json:"data"`
+	Success bool   `json:"success"`
 }

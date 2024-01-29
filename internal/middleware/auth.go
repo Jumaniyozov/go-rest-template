@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"github.com/Jumaniyozov/go-rest-template/pkg/response"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
@@ -11,7 +12,7 @@ const (
 	AuthorizationPayloadKey = "authorization_payload"
 )
 
-func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httprouter.Handle {
+func BasicAuth(h httprouter.Handle, resp *response.Response, requiredUser, requiredPassword string) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		// Get the Basic Authentication credentials
 		user, password, hasAuth := r.BasicAuth()
@@ -20,9 +21,7 @@ func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httpr
 			// Delegate request to the given handle
 			h(w, r, ps)
 		} else {
-			// Request Basic Authentication otherwise
-			w.Header().Set("WWW-Authenticate", "Basic realm=Restricted")
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			resp.PermissionDenied(w, "You are not authorized to view the content")
 		}
 	}
 }

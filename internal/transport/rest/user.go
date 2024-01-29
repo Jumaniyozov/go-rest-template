@@ -10,35 +10,27 @@ import (
 )
 
 type userHandler struct {
-	cfg     *config.Config
-	logger  *zerolog.Logger
-	service contractService.ServiceI
+	cfg      *config.Config
+	logger   *zerolog.Logger
+	response *response.Response
+	service  contractService.ServiceI
 }
 
 func (u *userHandler) ListAllUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	users, err := u.service.UserService().ListAllUsers()
 	if err != nil {
-		u.logger.Error().Err(err).Msg("Error while fetching users")
-		resp := response.Message{
-			Message: "Error while fetching users",
-			Code:    http.StatusInternalServerError,
-			Data:    nil,
-		}
-
-		err := response.WriteJSON(w, http.StatusInternalServerError, resp, nil)
-		if err != nil {
-			response.InternalErrorMessage(w, err, u.logger)
-		}
+		u.response.FetchError(w, "error while fetching users")
 	}
 
 	resp := response.Message{
 		Message: "Success",
 		Code:    http.StatusOK,
+		Success: true,
 		Data:    users,
 	}
 
-	err = response.WriteJSON(w, http.StatusOK, resp, nil)
+	err = u.response.WriteJSON(w, http.StatusOK, resp, nil)
 	if err != nil {
-		response.InternalErrorMessage(w, err, u.logger)
+		u.response.InternalErrorMessage(w, err)
 	}
 }
