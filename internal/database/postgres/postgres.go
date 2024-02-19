@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
-	contractRepository "github.com/Jumaniyozov/go-rest-template/internal/contracts/repository"
 	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
 	"github.com/Jumaniyozov/go-rest-template/internal/repository"
 	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
@@ -32,9 +31,9 @@ func NewPostgresDB(cfg *config.Config) (repository.RepositoryI, error) {
 	}, nil
 }
 
-func (p *postgresDB) UserRepository() contractRepository.UserI {
+func (p *postgresDB) UserRepository() user.UserI {
 	return user.NewRepository(p.q)
 }
-func (p *postgresDB) AuthRepository() contractRepository.AuthI {
+func (p *postgresDB) AuthRepository() auth.AuthI {
 	return auth.NewRepository(p.q)
 }

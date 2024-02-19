@@ -2,13 +2,16 @@ package service
 
 import (
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
-	contractRepository "github.com/Jumaniyozov/go-rest-template/internal/contracts/repository"
-	contractService "github.com/Jumaniyozov/go-rest-template/internal/contracts/service"
 	"github.com/Jumaniyozov/go-rest-template/internal/repository"
 	"github.com/Jumaniyozov/go-rest-template/internal/services/auth"
 	"github.com/Jumaniyozov/go-rest-template/internal/services/user"
 	"github.com/rs/zerolog"
 )
+
+type ServiceI interface {
+	UserService() user.UserI
+	AuthService() auth.AuthI
+}
 
 type service struct {
 	cfg *config.Config
@@ -16,7 +19,7 @@ type service struct {
 	rep repository.RepositoryI
 }
 
-func NewService(cfg *config.Config, log *zerolog.Logger, rep repository.RepositoryI) contractService.ServiceI {
+func New(cfg *config.Config, log *zerolog.Logger, rep repository.RepositoryI) ServiceI {
 	return &service{
 		cfg: cfg,
 		log: log,
@@ -24,9 +27,9 @@ func NewService(cfg *config.Config, log *zerolog.Logger, rep repository.Reposito
 	}
 }
 
-func (s *service) UserService() contractRepository.UserI {
-	return user.NewService(s.cfg, s.log, s.rep.UserRepository())
+func (s *service) UserService() user.UserI {
+	return user.New(s.cfg, s.log, s.rep.UserRepository())
 }
-func (s *service) AuthService() contractRepository.AuthI {
-	return auth.NewService(s.cfg, s.log, s.rep.AuthRepository())
+func (s *service) AuthService() auth.AuthI {
+	return auth.New(s.cfg, s.log, s.rep.AuthRepository())
 }

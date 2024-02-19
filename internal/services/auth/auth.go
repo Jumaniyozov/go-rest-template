@@ -2,18 +2,22 @@ package auth
 
 import (
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
-	"github.com/Jumaniyozov/go-rest-template/internal/contracts/repository"
 	"github.com/Jumaniyozov/go-rest-template/internal/models"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
 	"github.com/rs/zerolog"
 )
+
+type AuthI interface {
+	GetAllPermissions(userID int) ([]models.Permissions, error)
+}
 
 type authService struct {
 	cfg  *config.Config
 	log  *zerolog.Logger
-	repo repository.AuthI
+	repo auth.AuthI
 }
 
-func NewService(c *config.Config, l *zerolog.Logger, r repository.AuthI) repository.AuthI {
+func New(c *config.Config, l *zerolog.Logger, r auth.AuthI) AuthI {
 	return &authService{
 		cfg:  c,
 		log:  l,

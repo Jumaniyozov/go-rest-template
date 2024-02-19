@@ -2,7 +2,7 @@ package rest
 
 import (
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
-	contractService "github.com/Jumaniyozov/go-rest-template/internal/contracts/service"
+	service "github.com/Jumaniyozov/go-rest-template/internal/services"
 	"github.com/Jumaniyozov/go-rest-template/pkg/response"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/zerolog"
@@ -13,7 +13,7 @@ type userHandler struct {
 	cfg      *config.Config
 	logger   *zerolog.Logger
 	response *response.Response
-	service  contractService.ServiceI
+	service  service.ServiceI
 }
 
 func (u *userHandler) ListAllUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {

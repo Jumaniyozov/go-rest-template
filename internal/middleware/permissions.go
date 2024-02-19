@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	contractService "github.com/Jumaniyozov/go-rest-template/internal/contracts/service"
 	"github.com/Jumaniyozov/go-rest-template/internal/models"
+	service "github.com/Jumaniyozov/go-rest-template/internal/services"
 	"github.com/Jumaniyozov/go-rest-template/pkg/response"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -18,7 +18,7 @@ func PermissionsInclude(code string, p []models.Permissions) bool {
 	return false
 }
 
-func RequirePermission(h httprouter.Handle, resp *response.Response, requiredPermission string, srv contractService.ServiceI) httprouter.Handle {
+func RequirePermission(h httprouter.Handle, resp *response.Response, requiredPermission string, srv service.ServiceI) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		user := r.Context().Value(AuthorizationPayloadKey)
 

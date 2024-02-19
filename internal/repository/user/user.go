@@ -2,16 +2,19 @@ package user
 
 import (
 	"context"
-	"github.com/Jumaniyozov/go-rest-template/internal/contracts/repository"
 	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
 	"time"
 )
+
+type UserI interface {
+	ListAllUsers() ([]db.ListUsersRow, error)
+}
 
 type uRepository struct {
 	q *db.Queries
 }
 
-func NewRepository(q *db.Queries) repository.UserI {
+func NewRepository(q *db.Queries) UserI {
 	return &uRepository{
 		q: q,
 	}

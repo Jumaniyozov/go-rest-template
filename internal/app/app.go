@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/Jumaniyozov/go-rest-template/internal/app/routes"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
 	"github.com/Jumaniyozov/go-rest-template/internal/database/postgres"
 	loggerpkg "github.com/Jumaniyozov/go-rest-template/internal/logger"
@@ -28,14 +29,14 @@ func StartApp() {
 	}
 
 	// Initializing and setting up services
-	services := service.NewService(cfg, logger, rep)
+	services := service.New(cfg, logger, rep)
 
 	// Initializing and setting up router
-	router := SetupRouter(cfg, logger, services)
+	router := routes.New(cfg, logger, services)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.ServerPort),
-		Handler:      router,
+		Handler:      router.CreateHttpRouter(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 20 * time.Second,
