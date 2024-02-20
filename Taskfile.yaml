@@ -14,6 +14,7 @@ env:
 
 tasks:
   test:
+    desc: Test if taskfile is working
     requires:
       vars: [ DD, SS, AA, BB ]
     cmds:
@@ -21,6 +22,7 @@ tasks:
 
 
   db/create/docker/container/postgres:
+    desc: Create docker container for postgres
     requires:
       vars: [ DOCKER_POSTGRES_CONTAINER_NAME, POSTGRES_PORT, POSTGRES_PASSWORD, DOCKER_VOLUME_NAME ]
     cmds:
@@ -42,29 +44,62 @@ tasks:
       - docker exec -it {{.DOCKER_POSTGRES_CONTAINER_NAME}} dropdb --username={{.POSTGRES_USER}} {{.POSTGRES_DB_NAME}}
 
 
+  db/migrations/status:
+    cmds:
+      - echo 'Checking migration status...'
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose status
+
+  db/migrations/version:
+    cmds:
+      - echo 'Checking migration version...'
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose version
+
+  db/migrations/validate:
+    cmds:
+      - echo 'Validating migrations...'
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose validate
+
+  db/migrations/fix:
+    cmds:
+      - echo 'Fixing migrations to sequantial order...'
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose fix
+
+
   # db/migrations/new name=$1: create a new database migration
   db/migrations/new:
     requires:
       vars: [ name ]
     cmds:
       - echo 'Creating migration files for ${name}...'
-      - migrate create -seq -ext=.sql -dir={{.CURRENT_DIR}}/migrations {{.name}}
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose create {{.name}} sql
 
   db/migrate/up:
     prompt: You are running up migrations are you sure about running them up?... Do you want to continue?
-    requires:
-      vars: [ POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB_NAME ]
     cmds:
       - echo 'Running up migrations...'
-      - migrate -path {{.CURRENT_DIR}}/migrations -database 'postgres://{{.POSTGRES_USER}}:{{.POSTGRES_PASSWORD}}@{{.POSTGRES_HOST}}:{{.POSTGRES_PORT}}/{{.POSTGRES_DB_NAME}}?sslmode=disable' up
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose up
+
+  db/migrate/up/to:
+    prompt: You are running up migrations are you sure about running them up?... Do you want to continue?
+    requires:
+      vars: [ version ]
+    cmds:
+      - echo 'Running up migrations to version...'
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose up-to {{.version}}
 
   db/migrate/down:
     prompt: You are running down migrations are you sure about running them down?... Do you want to continue?
-    requires:
-      vars: [ POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB_NAME ]
     cmds:
       - echo 'Running down migrations...'
-      - migrate -path {{.CURRENT_DIR}}/migrations -database 'postgres://{{.POSTGRES_USER}}:{{.POSTGRES_PASSWORD}}@{{.POSTGRES_HOST}}:{{.POSTGRES_PORT}}/{{.POSTGRES_DB_NAME}}?sslmode=disable' down
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose down
+
+  db/migrate/down/to:
+    prompt: You are running down migrations are you sure about running them up?... Do you want to continue?
+    requires:
+      vars: [ version ]
+    cmds:
+      - echo 'Running down migrations to version...'
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose down-to {{.version}}
 
 
   db/sqlc:
