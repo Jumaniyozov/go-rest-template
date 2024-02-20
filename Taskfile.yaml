@@ -7,6 +7,8 @@ env:
   APP: $(basename {{.CURRENT_DIR}})
   API_CMD_DIR: '{{.CURRENT_DIR}}/cmd/api'
   API_DOCS_DIR: '{{.CURRENT_DIR}}/api/docs'
+  BUILD_DIR_LINUX: '{{.CURRENT_DIR}}/bin/linux_amd64'
+  BUILD_DIR_WINDOWS: '{{.CURRENT_DIR}}/bin/windows_amd64'
   TAG: 0.0.1
   ENV_TAG: 0.0.1
 
@@ -92,10 +94,20 @@ tasks:
       - go test -race -vet=off ./...
 
 
-  build/api:
+  build/api/windows:
+    requires:
+      vars: [ NAME ]
     cmds:
       - echo 'Building cmd/api...'
-      - GOOS=linux GOARCH=amd64 go build -ldflags="-s" -o={{.CURRENT_DIR}}/bin/linux_amd64/api {{.API_CMD_DIR}}
+      - go build {{.API_CMD_DIR}}
+
+  build/api/linux:
+    requires:
+      vars: [ NAME ]
+    cmds:
+      - echo 'Building cmd/api...'
+      - GOOS=linux GOARCH=amd64 go build -ldflags="-s" -o={{.BUILD_DIR_LINUX}}/{{.NAME}} {{.API_CMD_DIR}}
+      - cp .env {{.BUILD_DIR_LINUX}}/.env
 
   run/api:
     cmds:

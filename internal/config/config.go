@@ -1,76 +1,48 @@
 package config
 
 import (
-	"fmt"
-	"github.com/rs/zerolog"
+	"github.com/ilyakaznacheev/cleanenv"
 	"os"
-
-	"github.com/joho/godotenv"
-	"github.com/spf13/cast"
+	"path"
+	"path/filepath"
+	"time"
 )
 
 type Config struct {
-	ProdEnv               string
-	ServerHost            string
-	ServerPort            int
-	LogLevel              string
-	PostgresHost          string
-	PostgresPort          int
-	PostgresDBName        string
-	PostgresUser          string
-	PostgresPassword      string
-	DbUrl                 string
-	DBPoolMaxConnections  int
-	TokenSymmetricKey     string
-	AccessTokenDuration   string
-	RefreshTokenDuration  string
-	AccessTokenSecretKey  string
-	RefreshTokenSecretKey string
+	ServerHost                  string        `env:"SERVER_HOST" env-required`
+	ServerPort                  int           `env:"SERVER_PORT" env-required`
+	ProdEnv                     string        `env:"PROD_ENV" env-required`
+	LogLevel                    string        `env:"LOG_LEVEL" env-required`
+	PostgresHost                string        `env:"POSTGRES_HOST" env-required`
+	PostgresPort                int           `env:"POSTGRES_PORT" env-required`
+	PostgresDbName              string        `env:"POSTGRES_DB_NAME" env-required`
+	PostgresPassword            string        `env:"POSTGRES_PASSWORD" env-required`
+	PostgresUser                string        `env:"POSTGRES_USER" env-required`
+	DbPoolMaxConnection         int           `env:"DB_POOL_MAX_CONNECTION" env-required`
+	DockerPostgresContainerName string        `env:"DOCKER_POSTGRES_CONTAINER_NAME" env-required`
+	DockerVolumeName            string        `env:"DOCKER_VOLUME_NAME" env-required`
+	DbUrl                       string        `env:"DB_URL" env-required`
+	TokenSymmetricKey           string        `env:"TOKEN_SYMMETRIC_KEY" env-required`
+	AccessTokenDuration         time.Duration `env:"ACCESS_TOKEN_DURATION" env-required`
+	RefreshTokenDuration        time.Duration `env:"REFRESH_TOKEN_DURATION" env-required`
+	AccessTokenSecretKey        string        `env:"ACCESS_TOKEN_SECRET_KEY" env-required`
+	RefreshTokenSecretKey       string        `env:"REFRESH_TOKEN_SECRET_KEY" env-required`
 }
 
-//func New() *Config {
-//	return &Config{}
-//}
+func New() (*Config, error) {
+	var cfg Config
 
-func SetupConfigs(logger *zerolog.Logger) (*Config, error) {
-	if err := godotenv.Load("./.env"); err != nil {
-		logger.Error().Msgf("Error loading .env file: %v", err)
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+
+	err = cleanenv.ReadConfig(path.Join(exPath, ".env"), &cfg)
+	if err != nil {
 		return nil, err
+
 	}
 
-	cfg := new(Config)
-
-	cfg.ProdEnv = cast.ToString(getFromEnvOrDefault("PROD_ENV", "dev"))
-	cfg.LogLevel = cast.ToString(getFromEnvOrDefault("LOG_LEVEL", "debug"))
-	cfg.ServerPort = cast.ToInt(getFromEnvOrDefault("SERVER_PORT", 1324))
-	cfg.ServerHost = cast.ToString(getFromEnvOrDefault("SERVER_HOST", "127.0.0.1"))
-
-	cfg.PostgresPassword = cast.ToString(getFromEnvOrDefault("POSTGRES_PASSWORD", "password"))
-	cfg.PostgresDBName = cast.ToString(getFromEnvOrDefault("POSTGRES_DB_NAME", "postgres"))
-	cfg.PostgresPort = cast.ToInt(getFromEnvOrDefault("POSTGRES_PORT", 5434))
-	cfg.PostgresUser = cast.ToString(getFromEnvOrDefault("POSTGRES_USER", "postgres"))
-	cfg.PostgresHost = cast.ToString(getFromEnvOrDefault("POSTGRES_HOST", "localhost"))
-	cfg.DbUrl = cast.ToString(getFromEnvOrDefault("DB_URL", "postgres://postgres:password@127.0.0.1:5434/postgres?sslmode=disable"))
-	cfg.DBPoolMaxConnections = cast.ToInt(getFromEnvOrDefault("DB_POOL_MAX_CONNECTION", 30))
-
-	cfg.TokenSymmetricKey = cast.ToString(getFromEnvOrDefault("TOKEN_SYMMETRIC_KEY", ""))
-	cfg.AccessTokenDuration = cast.ToString(getFromEnvOrDefault("ACCESS_TOKEN_DURATION", ""))
-	cfg.RefreshTokenDuration = cast.ToString(getFromEnvOrDefault("REFRESH_TOKEN_DURATION", ""))
-	cfg.AccessTokenSecretKey = cast.ToString(getFromEnvOrDefault("ACCESS_TOKEN_SECRET_KEY", ""))
-	cfg.RefreshTokenSecretKey = cast.ToString(getFromEnvOrDefault("REFRESH_TOKEN_SECRET_KEY", ""))
-
-	if cfg.TokenSymmetricKey == "" || cfg.AccessTokenDuration == "" || cfg.RefreshTokenDuration == "" || cfg.AccessTokenSecretKey == "" || cfg.RefreshTokenSecretKey == "" {
-		return nil, fmt.Errorf("token symmetric key, access token duration, refresh token duration, access token secret key, refresh token secret key must be set")
-	}
-
-	return cfg, nil
-}
-
-func getFromEnvOrDefault(name string, defaultValue any) any {
-	value, exists := os.LookupEnv(name)
-	if !exists {
-		return defaultValue
-	}
-
-	return value
+	return &cfg, nil
 }

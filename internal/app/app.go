@@ -20,11 +20,10 @@ const (
 
 // StartApp starts the server
 func Start(ctx context.Context) error {
-	// Initializing logger
-	logger := loggerpkg.SetupLoggger()
+	logger := loggerpkg.New()
 
 	// Setting up configurations from environment variables
-	cfg, err := config.SetupConfigs(logger)
+	cfg, err := config.New()
 	if err != nil {
 		logger.Fatal().Err(err).Msgf("Failed to setup configs %v", err)
 	}
