@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
+	"github.com/Jumaniyozov/go-rest-template/internal/database/entities"
 	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
 	"github.com/Jumaniyozov/go-rest-template/internal/repository"
 	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
@@ -11,10 +12,10 @@ import (
 )
 
 type postgresDB struct {
-	q *db.Queries
+	entity *entities.Entities
 }
 
-func NewPostgresDB(cfg *config.Config) (repository.RepositoryI, error) {
+func New(cfg *config.Config) (repository.RepositoryI, error) {
 	dbpool, err := pgxpool.New(context.Background(), cfg.DbUrl)
 	if err != nil {
 		return nil, err
@@ -26,14 +27,12 @@ func NewPostgresDB(cfg *config.Config) (repository.RepositoryI, error) {
 
 	q := db.New(dbpool)
 
+	e := entities.New(q)
+
 	return &postgresDB{
-		q: q,
+		entity: e,
 	}, nil
 }
 
-func (p *postgresDB) UserRepository() user.UserI {
-	return user.NewRepository(p.q)
-}
-func (p *postgresDB) AuthRepository() auth.AuthI {
-	return auth.NewRepository(p.q)
-}
+func (p *postgresDB) UserRepository() user.UserI { return user.New(p.entity) }
+func (p *postgresDB) AuthRepository() auth.AuthI { return auth.New(p.entity) }

@@ -28,6 +28,10 @@ type Config struct {
 	RefreshTokenSecretKey string
 }
 
+//func New() *Config {
+//	return &Config{}
+//}
+
 func SetupConfigs(logger *zerolog.Logger) (*Config, error) {
 	if err := godotenv.Load("./.env"); err != nil {
 		logger.Error().Msgf("Error loading .env file: %v", err)

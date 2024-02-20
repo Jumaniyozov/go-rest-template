@@ -1,4 +1,4 @@
-package rest
+package swagger
 
 import (
 	"github.com/julienschmidt/httprouter"
@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-type swaggerHandler struct{}
+type Swagger struct{}
 
-func (s *swaggerHandler) Init(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (s *Swagger) Init(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	httpSwagger.WrapHandler(res, req)
 }

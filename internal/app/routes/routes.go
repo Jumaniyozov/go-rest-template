@@ -26,12 +26,12 @@ func New(c *config.Config, l *zerolog.Logger, s service.ServiceI) *Router {
 
 func (r *Router) CreateHttpRouter() *httprouter.Router {
 	router := httprouter.New()
-	handlers := rest.NewHandler(r.Config, r.Logger, r.Service)
-	resp := response.NewResponse(r.Logger)
+	handlers := rest.New(r.Config, r.Logger, r.Service)
+	resp := response.New(r.Logger)
 
-	router.GET("/swagger/:any", handlers.SwaggerHandler.Init)
-	router.GET("/users", handlers.UserHandler.ListAllUsers)
-	router.GET("/p/users", middlewares.RequirePermission(handlers.UserHandler.ListAllUsers, resp, "users:list", r.Service))
+	router.GET("/swagger/:any", middlewares.RequestLogger(handlers.Swagger.Init, r.Logger))
+	router.GET("/api/v1/users", middlewares.RequestLogger(handlers.User.List, r.Logger))
+	router.GET("/api/v1/p/users", middlewares.RequestLogger(middlewares.RequirePermission(handlers.User.List, resp, "users:list", r.Service), r.Logger))
 
 	return router
 }

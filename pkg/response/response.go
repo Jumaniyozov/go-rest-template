@@ -10,7 +10,7 @@ type Response struct {
 	logger *zerolog.Logger
 }
 
-func NewResponse(log *zerolog.Logger) *Response {
+func New(log *zerolog.Logger) *Response {
 	return &Response{
 		logger: log,
 	}

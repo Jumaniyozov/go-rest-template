@@ -1,18 +1,25 @@
 package app
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/Jumaniyozov/go-rest-template/internal/app/routes"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
 	"github.com/Jumaniyozov/go-rest-template/internal/database/postgres"
 	loggerpkg "github.com/Jumaniyozov/go-rest-template/internal/logger"
 	service "github.com/Jumaniyozov/go-rest-template/internal/services"
+	"github.com/Jumaniyozov/go-rest-template/pkg/closer"
 	"net/http"
 	"time"
 )
 
+const (
+	shutdownTimeout = 10 * time.Second
+)
+
 // StartApp starts the server
-func StartApp() {
+func Start(ctx context.Context) error {
 	// Initializing logger
 	logger := loggerpkg.SetupLoggger()
 
@@ -23,7 +30,7 @@ func StartApp() {
 	}
 
 	// Initializing repositories
-	rep, err := postgres.NewPostgresDB(cfg)
+	rep, err := postgres.New(cfg)
 	if err != nil {
 		logger.Fatal().Err(err).Msgf("Failed to connect to database %v", err)
 	}
@@ -34,6 +41,8 @@ func StartApp() {
 	// Initializing and setting up router
 	router := routes.New(cfg, logger, services)
 
+	clsr := &closer.Closer{}
+
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.ServerPort),
 		Handler:      router.CreateHttpRouter(),
@@ -42,9 +51,31 @@ func StartApp() {
 		WriteTimeout: 20 * time.Second,
 	}
 
-	logger.Info().Msgf("Starting server on port %d", cfg.ServerPort)
+	clsr.Add(srv.Shutdown)
 
-	if err = srv.ListenAndServe(); err != nil {
-		logger.Fatal().Err(err).Msgf("Failed to start server %v", err)
+	// Cleanup function
+	clsr.Add(func(ctx context.Context) error {
+		//time.Sleep(6 * time.Second)
+
+		return nil
+	})
+
+	go func() {
+		if err = srv.ListenAndServe(); err != nil && !errors.Is(http.ErrServerClosed, err) {
+			logger.Fatal().Err(err).Msgf("Failed to start server %v", err)
+		}
+	}()
+
+	logger.Info().Msgf("Listening server on port %d", cfg.ServerPort)
+	<-ctx.Done()
+	logger.Info().Msg("Shutting down server gracefully")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+
+	if err = clsr.Close(shutdownCtx); err != nil {
+		return fmt.Errorf("closer: %v", err)
 	}
+
+	return nil
 }

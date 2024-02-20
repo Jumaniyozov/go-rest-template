@@ -22,7 +22,7 @@ func RequirePermission(h httprouter.Handle, resp *response.Response, requiredPer
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		user := r.Context().Value(AuthorizationPayloadKey)
 
-		permissions, err := srv.AuthService().GetAllPermissions(user.(int))
+		permissions, err := srv.AuthService().AllPermissions(user.(int))
 
 		if err != nil {
 			resp.InternalServerError(w, "Error while getting permissions")

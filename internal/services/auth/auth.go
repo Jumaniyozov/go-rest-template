@@ -8,7 +8,7 @@ import (
 )
 
 type AuthI interface {
-	GetAllPermissions(userID int) ([]models.Permissions, error)
+	AllPermissions(userID int) ([]models.Permissions, error)
 }
 
 type authService struct {
@@ -25,8 +25,8 @@ func New(c *config.Config, l *zerolog.Logger, r auth.AuthI) AuthI {
 	}
 }
 
-func (u *authService) GetAllPermissions(userID int) ([]models.Permissions, error) {
-	permissions, err := u.repo.GetAllPermissions(userID)
+func (u *authService) AllPermissions(userID int) ([]models.Permissions, error) {
+	permissions, err := u.repo.AllPermissions(userID)
 	if err != nil {
 		return nil, err
 	}

@@ -8,17 +8,13 @@ import (
 )
 
 type UserI interface {
-	ListAllUsers() ([]db.ListUsersRow, error)
+	List() ([]db.ListRow, error)
 }
 
 type userService struct {
 	cfg  *config.Config
 	log  *zerolog.Logger
 	repo user.UserI
-}
-
-type UserServiceI interface {
-	ListAllUsers() ([]db.ListUsersRow, error)
 }
 
 func New(c *config.Config, l *zerolog.Logger, r user.UserI) UserI {
@@ -29,12 +25,11 @@ func New(c *config.Config, l *zerolog.Logger, r user.UserI) UserI {
 	}
 }
 
-func (u *userService) ListAllUsers() ([]db.ListUsersRow, error) {
-	users, err := u.repo.ListAllUsers()
+func (u *userService) List() ([]db.ListRow, error) {
+	users, err := u.repo.List()
 	if err != nil {
 		return nil, err
 	}
-	u.log.Info().Msg("ListingAllUsers")
 
 	return users, nil
 }

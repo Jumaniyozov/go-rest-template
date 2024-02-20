@@ -3,37 +3,34 @@ package rest
 import (
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
 	service "github.com/Jumaniyozov/go-rest-template/internal/services"
+	"github.com/Jumaniyozov/go-rest-template/internal/transport/rest/swagger"
+	"github.com/Jumaniyozov/go-rest-template/internal/transport/rest/user"
 	"github.com/Jumaniyozov/go-rest-template/pkg/response"
 	"github.com/rs/zerolog"
 )
 
 type Handler struct {
-	cfg *config.Config
-	log *zerolog.Logger
-
-	SwaggerHandler *swaggerHandler
-	UserHandler    *userHandler
+	Swagger *swagger.Swagger
+	User    *user.User
 }
 
-func NewHandler(
+func New(
 	cfg *config.Config,
 	log *zerolog.Logger,
 	service service.ServiceI,
 ) *Handler {
-	resp := response.NewResponse(log)
+	resp := response.New(log)
 
-	sh := &swaggerHandler{}
-	uh := &userHandler{
-		cfg:      cfg,
-		logger:   log,
-		service:  service,
-		response: resp,
+	sh := &swagger.Swagger{}
+	uh := &user.User{
+		Cfg:      cfg,
+		Logger:   log,
+		Service:  service,
+		Response: resp,
 	}
 
 	return &Handler{
-		cfg:            cfg,
-		log:            log,
-		SwaggerHandler: sh,
-		UserHandler:    uh,
+		Swagger: sh,
+		User:    uh,
 	}
 }

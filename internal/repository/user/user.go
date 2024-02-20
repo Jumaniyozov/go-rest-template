@@ -2,29 +2,30 @@ package user
 
 import (
 	"context"
+	"github.com/Jumaniyozov/go-rest-template/internal/database/entities"
 	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
 	"time"
 )
 
 type UserI interface {
-	ListAllUsers() ([]db.ListUsersRow, error)
+	List() ([]db.ListRow, error)
 }
 
-type uRepository struct {
-	q *db.Queries
+type repository struct {
+	entity *entities.Entities
 }
 
-func NewRepository(q *db.Queries) UserI {
-	return &uRepository{
-		q: q,
+func New(e *entities.Entities) UserI {
+	return &repository{
+		entity: e,
 	}
 }
 
-func (u *uRepository) ListAllUsers() ([]db.ListUsersRow, error) {
+func (u *repository) List() ([]db.ListRow, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	users, err := u.q.ListUsers(ctx, db.ListUsersParams{
+	users, err := u.entity.User.List(ctx, db.ListParams{
 		Offset: 0,
 		Limit:  100,
 	})

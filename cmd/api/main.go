@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
 	_ "github.com/Jumaniyozov/go-rest-template/api/docs"
 	"github.com/Jumaniyozov/go-rest-template/internal/app"
+	"log"
+	"os/signal"
+	"syscall"
 )
 
 // @title Swagger Example API
@@ -20,5 +24,10 @@ import (
 // @host petstore.swagger.io
 // @BasePath /v2
 func main() {
-	app.StartApp()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	defer stop()
+
+	if err := app.Start(ctx); err != nil {
+		log.Fatal(err)
+	}
 }

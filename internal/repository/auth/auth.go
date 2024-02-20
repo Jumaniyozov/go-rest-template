@@ -1,25 +1,25 @@
 package auth
 
 import (
-	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
+	"github.com/Jumaniyozov/go-rest-template/internal/database/entities"
 	"github.com/Jumaniyozov/go-rest-template/internal/models"
 )
 
 type AuthI interface {
-	GetAllPermissions(userID int) ([]models.Permissions, error)
+	AllPermissions(userID int) ([]models.Permissions, error)
 }
 
-type aRepository struct {
-	q *db.Queries
+type repository struct {
+	entity *entities.Entities
 }
 
-func NewRepository(q *db.Queries) AuthI {
-	return &aRepository{
-		q: q,
+func New(e *entities.Entities) AuthI {
+	return &repository{
+		entity: e,
 	}
 }
 
-func (u *aRepository) GetAllPermissions(userID int) ([]models.Permissions, error) {
+func (u *repository) AllPermissions(userID int) ([]models.Permissions, error) {
 	permissions := []models.Permissions{
 		{
 			Permission: "read",
