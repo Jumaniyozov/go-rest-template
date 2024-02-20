@@ -1,0 +1,108 @@
+version: '3'
+
+dotenv: [ '.env' ]
+
+env:
+  CURRENT_DIR: $(pwd)
+  APP: $(basename {{.CURRENT_DIR}})
+  API_CMD_DIR: '{{.CURRENT_DIR}}/cmd/api'
+  API_DOCS_DIR: '{{.CURRENT_DIR}}/api/docs'
+  TAG: 0.0.1
+  ENV_TAG: 0.0.1
+
+tasks:
+  test:
+    requires:
+      vars: [ DD, SS, AA, BB ]
+    cmds:
+      - echo "{{.DD}} {{.SS}} {{.AA}} {{.BB}}"
+
+
+  db/create/docker/container/postgres:
+    requires:
+      vars: [ DOCKER_POSTGRES_CONTAINER_NAME, POSTGRES_PORT, POSTGRES_PASSWORD, DOCKER_VOLUME_NAME ]
+    cmds:
+      - echo 'Creating docker postgres container...'
+      - docker run -d --name {{.DOCKER_POSTGRES_CONTAINER_NAME}} -p {{.POSTGRES_PORT}}:5432 -e POSTGRES_PASSWORD={{.POSTGRES_PASSWORD}} -v {{.DOCKER_VOLUME_NAME}}:/var/lib/postgresql/data --restart always postgres
+
+  db/create/docker/database:
+    requires:
+      vars: [ DOCKER_POSTGRES_CONTAINER_NAME, POSTGRES_USER, POSTGRES_DB_NAME ]
+    cmds:
+      - echo 'Creating docker database...'
+      - docker exec -it {{.DOCKER_POSTGRES_CONTAINER_NAME}} createdb --username={{.POSTGRES_USER}} --owner={{.POSTGRES_USER}} {{.POSTGRES_DB_NAME}}
+
+  db/drop/docker/database:
+    requires:
+      vars: [ DOCKER_POSTGRES_CONTAINER_NAME, POSTGRES_USER, POSTGRES_DB_NAME ]
+    cmds:
+      - echo 'Dropping docker database...'
+      - docker exec -it {{.DOCKER_POSTGRES_CONTAINER_NAME}} dropdb --username={{.POSTGRES_USER}} {{.POSTGRES_DB_NAME}}
+
+
+  # db/migrations/new name=$1: create a new database migration
+  db/migrations/new:
+    requires:
+      vars: [ name ]
+    cmds:
+      - echo 'Creating migration files for ${name}...'
+      - migrate create -seq -ext=.sql -dir={{.CURRENT_DIR}}/migrations {{.name}}
+
+  db/migrate/up:
+    prompt: You are running up migrations are you sure about running them up?... Do you want to continue?
+    requires:
+      vars: [ POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB_NAME ]
+    cmds:
+      - echo 'Running up migrations...'
+      - migrate -path {{.CURRENT_DIR}}/migrations -database 'postgres://{{.POSTGRES_USER}}:{{.POSTGRES_PASSWORD}}@{{.POSTGRES_HOST}}:{{.POSTGRES_PORT}}/{{.POSTGRES_DB_NAME}}?sslmode=disable' up
+
+  db/migrate/down:
+    prompt: You are running down migrations are you sure about running them down?... Do you want to continue?
+    requires:
+      vars: [ POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB_NAME ]
+    cmds:
+      - echo 'Running down migrations...'
+      - migrate -path {{.CURRENT_DIR}}/migrations -database 'postgres://{{.POSTGRES_USER}}:{{.POSTGRES_PASSWORD}}@{{.POSTGRES_HOST}}:{{.POSTGRES_PORT}}/{{.POSTGRES_DB_NAME}}?sslmode=disable' down
+
+
+  db/sqlc:
+    cmds:
+      - echo 'Generating sqlc files...'
+      - sqlc generate
+
+
+  # vendor: tidy and vendor dependencies
+  vendor:
+    cmds:
+      - echo 'Tidying and verifying module dependencies...'
+      - go mod tidy
+      - go mod verify
+      - echo 'Vendoring dependencies...'
+      - go mod vendor
+
+  audit:
+    cmds:
+      - task: vendor
+      - echo 'Formatting code...'
+      - go fmt ./...
+      - echo 'Vetting code...'
+      - go vet ./...
+      - staticcheck ./...
+      - echo 'Running tests...'
+      - go test -race -vet=off ./...
+
+
+  build/api:
+    cmds:
+      - echo 'Building cmd/api...'
+      - GOOS=linux GOARCH=amd64 go build -ldflags="-s" -o={{.CURRENT_DIR}}/bin/linux_amd64/api {{.API_CMD_DIR}}
+
+  run/api:
+    cmds:
+      - echo 'Starting a server...'
+      - go run {{.API_CMD_DIR}}/main.go
+
+  swag:
+    cmds:
+      - echo 'Initializing swagger...'
+      - swag init -dir {{.API_CMD_DIR}} -o {{.API_DOCS_DIR}}
