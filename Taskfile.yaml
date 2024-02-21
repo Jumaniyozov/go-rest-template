@@ -130,8 +130,6 @@ tasks:
 
 
   build/api/windows:
-    requires:
-      vars: [ NAME ]
     cmds:
       - echo 'Building cmd/api...'
       - go build {{.API_CMD_DIR}}

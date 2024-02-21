@@ -20,13 +20,14 @@ const (
 
 // StartApp starts the server
 func Start(ctx context.Context) error {
-	logger := loggerpkg.New()
 
 	// Setting up configurations from environment variables
 	cfg, err := config.New()
 	if err != nil {
-		logger.Fatal().Err(err).Msgf("Failed to setup configs %v", err)
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 	}
+
+	logger := loggerpkg.New(cfg)
 
 	// Initializing repositories
 	rep, err := postgres.New(cfg)
