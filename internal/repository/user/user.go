@@ -4,11 +4,10 @@ import (
 	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/database/entities"
 	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
-	"time"
 )
 
 type UserI interface {
-	List() ([]db.ListRow, error)
+	List(ctx context.Context) ([]db.ListRow, error)
 }
 
 type repository struct {
@@ -21,10 +20,7 @@ func New(e *entities.Entities) UserI {
 	}
 }
 
-func (u *repository) List() ([]db.ListRow, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
+func (u *repository) List(ctx context.Context) ([]db.ListRow, error) {
 	users, err := u.entity.User.List(ctx, db.ListParams{
 		Offset: 0,
 		Limit:  100,

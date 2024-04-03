@@ -1,12 +1,13 @@
 package auth
 
 import (
+	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/database/entities"
 	"github.com/Jumaniyozov/go-rest-template/internal/models"
 )
 
 type AuthI interface {
-	AllPermissions(userID int) ([]models.Permissions, error)
+	AllPermissions(ctx context.Context, userID int) ([]models.Permissions, error)
 }
 
 type repository struct {
@@ -19,7 +20,7 @@ func New(e *entities.Entities) AuthI {
 	}
 }
 
-func (u *repository) AllPermissions(userID int) ([]models.Permissions, error) {
+func (u *repository) AllPermissions(ctx context.Context, userID int) ([]models.Permissions, error) {
 	permissions := []models.Permissions{
 		{
 			Permission: "read",

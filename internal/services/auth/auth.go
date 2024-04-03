@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
 	"github.com/Jumaniyozov/go-rest-template/internal/models"
 	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
@@ -8,7 +9,7 @@ import (
 )
 
 type AuthI interface {
-	AllPermissions(userID int) ([]models.Permissions, error)
+	AllPermissions(ctx context.Context, userID int) ([]models.Permissions, error)
 }
 
 type authService struct {
@@ -25,8 +26,8 @@ func New(c *config.Config, l *zerolog.Logger, r auth.AuthI) AuthI {
 	}
 }
 
-func (u *authService) AllPermissions(userID int) ([]models.Permissions, error) {
-	permissions, err := u.repo.AllPermissions(userID)
+func (u *authService) AllPermissions(ctx context.Context, userID int) ([]models.Permissions, error) {
+	permissions, err := u.repo.AllPermissions(ctx, userID)
 	if err != nil {
 		return nil, err
 	}

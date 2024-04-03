@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
 	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
 	"github.com/Jumaniyozov/go-rest-template/internal/repository/user"
@@ -9,7 +8,7 @@ import (
 )
 
 type UserI interface {
-	List(ctx context.Context) ([]db.ListRow, error)
+	List() ([]db.ListRow, error)
 }
 
 type userService struct {
@@ -26,8 +25,8 @@ func New(c *config.Config, l *zerolog.Logger, r user.UserI) UserI {
 	}
 }
 
-func (u *userService) List(ctx context.Context) ([]db.ListRow, error) {
-	users, err := u.repo.List(ctx)
+func (u *userService) List() ([]db.ListRow, error) {
+	users, err := u.repo.List()
 	if err != nil {
 		return nil, err
 	}

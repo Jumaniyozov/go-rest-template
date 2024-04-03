@@ -18,7 +18,7 @@ const (
 	shutdownTimeout = 10 * time.Second
 )
 
-// StartApp starts the server
+// Start starts up the server
 func Start(ctx context.Context) error {
 
 	// Setting up configurations from environment variables
