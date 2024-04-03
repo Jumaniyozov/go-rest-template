@@ -11,10 +11,10 @@ import (
 )
 
 type Logger struct {
-	log *zerolog.Logger
+	Logger *zerolog.Logger
 }
 
-func New(cfg *config.Config) *zerolog.Logger {
+func New(cfg *config.Config) *Logger {
 	var logger zerolog.Logger
 	if cfg.ProdEnv == "dev" {
 		logger = zerolog.New(zerolog.ConsoleWriter{
@@ -40,5 +40,7 @@ func New(cfg *config.Config) *zerolog.Logger {
 		logger = zerolog.New(os.Stdout).Level(zerolog.InfoLevel).With().Timestamp().Logger()
 	}
 
-	return &logger
+	return &Logger{
+		Logger: &logger,
+	}
 }

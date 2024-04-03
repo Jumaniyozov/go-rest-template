@@ -24,15 +24,15 @@ func Start(ctx context.Context) error {
 	// Setting up configurations from environment variables
 	cfg, err := config.New()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+		panic(fmt.Errorf("fatal error config file: %s", err))
 	}
 
-	logger := loggerpkg.New(cfg)
+	logger := loggerpkg.New(cfg).Logger
 
 	// Initializing repositories
 	rep, err := postgres.New(cfg)
 	if err != nil {
-		logger.Fatal().Err(err).Msgf("Failed to connect to database %v", err)
+		logger.Fatal().Err(err).Msgf("failed to connect to database %v", err)
 	}
 
 	// Initializing and setting up services
@@ -62,7 +62,7 @@ func Start(ctx context.Context) error {
 
 	go func() {
 		if err = srv.ListenAndServe(); err != nil && !errors.Is(http.ErrServerClosed, err) {
-			logger.Fatal().Err(err).Msgf("Failed to start server %v", err)
+			logger.Fatal().Err(err).Msgf("failed to start server %v", err)
 		}
 	}()
 
