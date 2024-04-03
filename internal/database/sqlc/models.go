@@ -6,9 +6,12 @@ package db
 
 import ()
 
+type Permission struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
 type User struct {
-	ID       int64  `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
 }

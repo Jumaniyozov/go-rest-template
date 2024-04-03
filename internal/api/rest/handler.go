@@ -1,10 +1,10 @@
 package rest
 
 import (
+	"github.com/Jumaniyozov/go-rest-template/internal/api/rest/swagger"
+	"github.com/Jumaniyozov/go-rest-template/internal/api/rest/user"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
 	service "github.com/Jumaniyozov/go-rest-template/internal/services"
-	"github.com/Jumaniyozov/go-rest-template/internal/transport/rest/swagger"
-	"github.com/Jumaniyozov/go-rest-template/internal/transport/rest/user"
 	"github.com/Jumaniyozov/go-rest-template/pkg/response"
 	"github.com/rs/zerolog"
 )

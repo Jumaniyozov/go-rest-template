@@ -24,10 +24,20 @@ import (
 // @host petstore.swagger.io
 // @BasePath /v2
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	if err := app.Start(ctx); err != nil {
-		log.Fatal(err)
+	//if err := app.Start(ctx); err != nil {
+	//	log.Fatal(err)
+	//}
+
+	a, err := app.NewApp(ctx)
+	if err != nil {
+		log.Fatalf("failed to init app: %s", err.Error())
+	}
+
+	err = a.Run()
+	if err != nil {
+		log.Fatalf("failed to run app: %s", err.Error())
 	}
 }

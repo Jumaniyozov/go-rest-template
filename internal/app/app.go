@@ -2,14 +2,9 @@ package app
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"github.com/Jumaniyozov/go-rest-template/internal/app/routes"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
-	"github.com/Jumaniyozov/go-rest-template/internal/database/postgres"
 	loggerpkg "github.com/Jumaniyozov/go-rest-template/internal/logger"
-	service "github.com/Jumaniyozov/go-rest-template/internal/services"
-	"github.com/Jumaniyozov/go-rest-template/pkg/closer"
+	"net"
 	"net/http"
 	"time"
 )
@@ -18,63 +13,81 @@ const (
 	shutdownTimeout = 10 * time.Second
 )
 
-// Start starts up the server
-func Start(ctx context.Context) error {
+type App struct {
+	serviceProvider *serviceProvider
+	restServer      *http.Handler
+}
 
-	// Setting up configurations from environment variables
-	cfg, err := config.New()
-	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %s", err))
-	}
+func NewApp(ctx context.Context) (*App, error) {
+	a := &App{}
 
 	logger := loggerpkg.New(cfg).Logger
 
-	// Initializing repositories
-	rep, err := postgres.New(cfg)
+	err := a.initDeps(ctx)
 	if err != nil {
-		logger.Fatal().Err(err).Msgf("failed to connect to database %v", err)
+		return nil, err
 	}
 
-	// Initializing and setting up services
-	services := service.New(cfg, logger, rep)
+	return a, nil
+}
 
-	// Initializing and setting up router
-	router := routes.New(cfg, logger, services)
+// Start starts up the server
+func RunRest(ctx context.Context) error {
 
-	clsr := &closer.Closer{}
+}
 
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.ServerPort),
-		Handler:      router.CreateHttpRouter(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 20 * time.Second,
+func (a *App) initDeps(ctx context.Context) error {
+	inits := []func(context.Context) error{
+		a.initConfig,
+		a.initServiceProvider,
+		a.initGRPCServer,
 	}
 
-	clsr.Add(srv.Shutdown)
-
-	// Cleanup function
-	clsr.Add(func(ctx context.Context) error {
-		//time.Sleep(6 * time.Second)
-
-		return nil
-	})
-
-	go func() {
-		if err = srv.ListenAndServe(); err != nil && !errors.Is(http.ErrServerClosed, err) {
-			logger.Fatal().Err(err).Msgf("failed to start server %v", err)
+	for _, f := range inits {
+		err := f(ctx)
+		if err != nil {
+			return err
 		}
-	}()
+	}
 
-	logger.Info().Msgf("Listening server on port %d", cfg.ServerPort)
-	<-ctx.Done()
-	logger.Info().Msg("Shutting down server gracefully")
+	return nil
+}
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-	defer cancel()
+func (a *App) initConfig(_ context.Context) error {
+	err := config.Load(".env")
+	if err != nil {
+		return err
+	}
 
-	if err = clsr.Close(shutdownCtx); err != nil {
-		return fmt.Errorf("closer: %v", err)
+	return nil
+}
+
+func (a *App) initServiceProvider(_ context.Context) error {
+	a.serviceProvider = newServiceProvider()
+	return nil
+}
+
+func (a *App) initGRPCServer(ctx context.Context) error {
+	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
+
+	reflection.Register(a.grpcServer)
+
+	desc.RegisterNoteV1Server(a.grpcServer, a.serviceProvider.NoteImpl(ctx))
+
+	return nil
+}
+
+func (a *App) runRestServer() error {
+	log.Printf("GRPC server is running on %s", a.serviceProvider.GRPCConfig().Address())
+
+	list, err := net.Listen("tcp", a.serviceProvider.GRPCConfig().Address())
+	if err != nil {
+		return err
+	}
+
+	err = a.grpcServer.Serve(list)
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -9,29 +9,29 @@ import (
 	"context"
 )
 
-const list = `-- name: List :many
+const listUsers = `-- name: ListUsers :many
 SELECT 
 FROM user
 OFFSET $1 LIMIT $2
 `
 
-type ListParams struct {
+type ListUsersParams struct {
 	Offset int32 `json:"offset"`
 	Limit  int32 `json:"limit"`
 }
 
-type ListRow struct {
+type ListUsersRow struct {
 }
 
-func (q *Queries) List(ctx context.Context, arg ListParams) ([]ListRow, error) {
-	rows, err := q.db.Query(ctx, list, arg.Offset, arg.Limit)
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUsersRow, error) {
+	rows, err := q.db.Query(ctx, listUsers, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []ListRow{}
+	items := []ListUsersRow{}
 	for rows.Next() {
-		var i ListRow
+		var i ListUsersRow
 		if err := rows.Scan(); err != nil {
 			return nil, err
 		}

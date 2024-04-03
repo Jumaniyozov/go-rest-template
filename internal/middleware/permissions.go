@@ -1,11 +1,13 @@
 package middlewares
 
 import (
+	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/models"
 	service "github.com/Jumaniyozov/go-rest-template/internal/services"
 	"github.com/Jumaniyozov/go-rest-template/pkg/response"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"time"
 )
 
 func PermissionsInclude(code string, p []models.Permissions) bool {
@@ -22,7 +24,10 @@ func RequirePermission(h httprouter.Handle, resp *response.Response, requiredPer
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		user := r.Context().Value(AuthorizationPayloadKey)
 
-		permissions, err := srv.AuthService().AllPermissions(user.(int))
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+
+		permissions, err := srv.AuthService().AllPermissions(ctx, user.(int))
 
 		if err != nil {
 			resp.InternalServerError(w, "Error while getting permissions")

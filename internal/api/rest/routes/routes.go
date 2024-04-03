@@ -1,26 +1,24 @@
 package routes
 
 import (
+	"github.com/Jumaniyozov/go-rest-template/internal/api/rest"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
 	middlewares "github.com/Jumaniyozov/go-rest-template/internal/middleware"
 	service "github.com/Jumaniyozov/go-rest-template/internal/services"
-	"github.com/Jumaniyozov/go-rest-template/internal/transport/rest"
 	"github.com/Jumaniyozov/go-rest-template/pkg/response"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/zerolog"
 )
 
 type Router struct {
-	Config  *config.Config
-	Logger  *zerolog.Logger
-	Service service.ServiceI
+	Config *config.Config
+	Logger *zerolog.Logger
 }
 
 func New(c *config.Config, l *zerolog.Logger, s service.ServiceI) *Router {
 	return &Router{
-		Config:  c,
-		Logger:  l,
-		Service: s,
+		Config: c,
+		Logger: l,
 	}
 }
 

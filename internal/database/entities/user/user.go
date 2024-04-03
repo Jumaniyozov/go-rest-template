@@ -6,5 +6,5 @@ import (
 )
 
 type User interface {
-	List(ctx context.Context, arg db.ListParams) ([]db.ListRow, error)
+	ListUsers(ctx context.Context, arg db.ListUsersParams) ([]db.ListUsersRow, error)
 }

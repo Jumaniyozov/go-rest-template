@@ -9,7 +9,7 @@ import (
 )
 
 type Querier interface {
-	List(ctx context.Context, arg ListParams) ([]ListRow, error)
+	ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUsersRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

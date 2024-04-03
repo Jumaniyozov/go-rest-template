@@ -4,29 +4,34 @@ import (
 	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/database/entities"
 	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
+	"github.com/Jumaniyozov/go-rest-template/internal/models"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository/user/converter"
 )
 
-type UserI interface {
-	List(ctx context.Context) ([]db.ListRow, error)
-}
-
-type repository struct {
+type repo struct {
 	entity *entities.Entities
 }
 
-func New(e *entities.Entities) UserI {
-	return &repository{
+func New(e *entities.Entities) repository.User {
+	return &repo{
 		entity: e,
 	}
 }
 
-func (u *repository) List(ctx context.Context) ([]db.ListRow, error) {
-	users, err := u.entity.User.List(ctx, db.ListParams{
+func (u *repo) List(ctx context.Context) ([]*models.User, error) {
+	repoU, err := u.entity.User.ListUsers(ctx, db.ListUsersParams{
 		Offset: 0,
 		Limit:  100,
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	users := make([]*models.User, len(repoU))
+
+	for _, v := range repoU {
+		users = append(users, converter.ToUserFromRepo(&v))
 	}
 
 	return users, nil
