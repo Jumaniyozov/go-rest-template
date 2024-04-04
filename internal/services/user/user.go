@@ -2,31 +2,22 @@ package user
 
 import (
 	"context"
-	"github.com/Jumaniyozov/go-rest-template/internal/config"
-	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
-	"github.com/Jumaniyozov/go-rest-template/internal/repository/user"
-	"github.com/rs/zerolog"
+	"github.com/Jumaniyozov/go-rest-template/internal/models"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository"
+	service "github.com/Jumaniyozov/go-rest-template/internal/services"
 )
 
-type UserI interface {
-	List(ctx context.Context) ([]db.ListRow, error)
-}
-
 type userService struct {
-	cfg  *config.Config
-	log  *zerolog.Logger
-	repo user.UserI
+	repo repository.User
 }
 
-func New(c *config.Config, l *zerolog.Logger, r user.UserI) UserI {
+func New(r repository.User) service.User {
 	return &userService{
-		cfg:  c,
-		log:  l,
 		repo: r,
 	}
 }
 
-func (u *userService) List(ctx context.Context) ([]db.ListRow, error) {
+func (u *userService) List(ctx context.Context) ([]*models.User, error) {
 	users, err := u.repo.List(ctx)
 	if err != nil {
 		return nil, err

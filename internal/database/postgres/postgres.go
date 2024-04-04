@@ -34,5 +34,5 @@ func New(cfg *config.Config) (repository.RepositoryI, error) {
 	}, nil
 }
 
-func (p *postgresDB) UserRepository() user.UserI { return user.New(p.entity) }
-func (p *postgresDB) AuthRepository() auth.AuthI { return auth.New(p.entity) }
+func (p *postgresDB) UserRepository() repository.User { return user.New(p.entity) }
+func (p *postgresDB) AuthRepository() repository.Auth { return auth.New(p.entity) }

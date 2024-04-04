@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
 	service "github.com/Jumaniyozov/go-rest-template/internal/services"
 	"github.com/Jumaniyozov/go-rest-template/pkg/response"
@@ -13,11 +14,11 @@ type User struct {
 	Cfg      *config.Config
 	Logger   *zerolog.Logger
 	Response *response.Response
-	Service  service.ServiceI
+	Service  service.Service
 }
 
 func (u *User) List(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	users, err := u.Service.UserService().List()
+	users, err := u.Service.User.List(context.Background())
 	if err != nil {
 		u.Response.FetchError(w, "error while fetching users")
 	}
