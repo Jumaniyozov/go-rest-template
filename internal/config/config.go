@@ -9,24 +9,24 @@ import (
 )
 
 type Config struct {
-	ServerHost                  string        `env:"SERVER_HOST"`
-	ServerPort                  int           `env:"SERVER_PORT"`
-	ProdEnv                     string        `env:"PROD_ENV"`
-	LogLevel                    string        `env:"LOG_LEVEL"`
-	PostgresHost                string        `env:"POSTGRES_HOST"`
-	PostgresPort                int           `env:"POSTGRES_PORT"`
-	PostgresDbName              string        `env:"POSTGRES_DB_NAME"`
-	PostgresPassword            string        `env:"POSTGRES_PASSWORD"`
-	PostgresUser                string        `env:"POSTGRES_USER"`
-	DbPoolMaxConnection         int           `env:"DB_POOL_MAX_CONNECTION"`
-	DockerPostgresContainerName string        `env:"DOCKER_POSTGRES_CONTAINER_NAME"`
-	DockerVolumeName            string        `env:"DOCKER_VOLUME_NAME"`
-	DbUrl                       string        `env:"DB_URL"`
-	TokenSymmetricKey           string        `env:"TOKEN_SYMMETRIC_KEY"`
-	AccessTokenDuration         time.Duration `env:"ACCESS_TOKEN_DURATION"`
-	RefreshTokenDuration        time.Duration `env:"REFRESH_TOKEN_DURATION"`
-	AccessTokenSecretKey        string        `env:"ACCESS_TOKEN_SECRET_KEY"`
-	RefreshTokenSecretKey       string        `env:"REFRESH_TOKEN_SECRET_KEY"`
+	ServerPort                  int           `env:"SERVER_PORT" env-required:"true"`
+	PostgresPort                int           `env:"POSTGRES_PORT" env-required:"true"`
+	DbPoolMaxConnection         int           `env:"DB_POOL_MAX_CONNECTION" env-required:"true"`
+	AccessTokenDuration         time.Duration `env:"ACCESS_TOKEN_DURATION" env-required:"true"`
+	RefreshTokenDuration        time.Duration `env:"REFRESH_TOKEN_DURATION" env-required:"true"`
+	ServerHost                  string        `env:"SERVER_HOST" env-required:"true"`
+	ProdEnv                     string        `env:"PROD_ENV" env-required:"true"`
+	LogLevel                    string        `env:"LOG_LEVEL" env-required:"true"`
+	PostgresHost                string        `env:"POSTGRES_HOST" env-required:"true"`
+	PostgresDbName              string        `env:"POSTGRES_DB_NAME" env-required:"true"`
+	PostgresPassword            string        `env:"POSTGRES_PASSWORD" env-required:"true"`
+	PostgresUser                string        `env:"POSTGRES_USER" env-required:"true"`
+	DockerPostgresContainerName string        `env:"DOCKER_POSTGRES_CONTAINER_NAME" env-required:"true"`
+	DockerVolumeName            string        `env:"DOCKER_VOLUME_NAME" env-required:"true"`
+	DbUrl                       string        `env:"DB_URL" env-required:"true"`
+	TokenSymmetricKey           string        `env:"TOKEN_SYMMETRIC_KEY" env-required:"true"`
+	AccessTokenSecretKey        string        `env:"ACCESS_TOKEN_SECRET_KEY" env-required:"true"`
+	RefreshTokenSecretKey       string        `env:"REFRESH_TOKEN_SECRET_KEY" env-required:"true"`
 }
 
 func New() (*Config, error) {

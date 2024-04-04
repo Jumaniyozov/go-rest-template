@@ -2,6 +2,7 @@ package response
 
 import (
 	"encoding/json"
+	"github.com/Jumaniyozov/go-rest-template/internal/logger"
 	"github.com/rs/zerolog"
 	"net/http"
 )
@@ -10,9 +11,10 @@ type Response struct {
 	logger *zerolog.Logger
 }
 
-func New(log *zerolog.Logger) *Response {
+func New(log *logger.Logger) *Response {
+	l := log.Logger
 	return &Response{
-		logger: log,
+		logger: l,
 	}
 }
 

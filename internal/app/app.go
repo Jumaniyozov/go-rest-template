@@ -8,8 +8,10 @@ import (
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
 	"github.com/Jumaniyozov/go-rest-template/internal/database/postgres"
 	loggerpkg "github.com/Jumaniyozov/go-rest-template/internal/logger"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository"
 	service "github.com/Jumaniyozov/go-rest-template/internal/services"
 	"github.com/Jumaniyozov/go-rest-template/pkg/closer"
+	"log"
 	"net/http"
 	"time"
 )
@@ -18,40 +20,114 @@ const (
 	shutdownTimeout = 10 * time.Second
 )
 
-// Start starts up the server
-func Start(ctx context.Context) error {
+type App struct {
+	serviceProvider *service.Service
+	httpServer      *http.Server
+	repository      *repository.Repository
+	config          *config.Config
+	logger          *loggerpkg.Logger
+}
 
-	// Setting up configurations from environment variables
-	cfg, err := config.New()
+func New() *App {
+	a := &App{}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	err := a.initDeps(ctx)
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %s", err))
+		log.Fatalf("failed to initialize dependencies: %v", err)
 	}
 
-	logger := loggerpkg.New(cfg).Logger
+	return a
+}
 
-	// Initializing repositories
-	rep, err := postgres.New(cfg)
-	if err != nil {
-		logger.Fatal().Err(err).Msgf("failed to connect to database %v", err)
+func (a *App) initDeps(ctx context.Context) error {
+	inits := []func(context.Context) error{
+		a.initConfig,
+		a.initLogger,
+		a.initServices,
+		a.initRepository,
+		a.initHTTPServer,
 	}
 
-	// Initializing and setting up services
-	services := service.New(cfg, logger, rep)
+	for _, f := range inits {
+		err := f(ctx)
+		if err != nil {
+			return err
+		}
+	}
 
-	// Initializing and setting up router
-	router := routes.New(cfg, logger, services)
+	return nil
+}
+
+func (a *App) initConfig(_ context.Context) error {
+	if a.config == nil {
+		cfg, err := config.New()
+		if err != nil {
+			return fmt.Errorf("config: %v", err)
+		}
+
+		a.config = cfg
+	}
+
+	return nil
+}
+
+func (a *App) initLogger(_ context.Context) error {
+	if a.logger == nil {
+		logger := loggerpkg.New(a.config)
+		a.logger = logger
+	}
+
+	return nil
+}
+
+func (a *App) initRepository(_ context.Context) error {
+	if a.repository == nil {
+		rep, err := postgres.New(a.config)
+		if err != nil {
+			return fmt.Errorf("repository: %v", err)
+		}
+
+		a.repository = rep
+	}
+
+	return nil
+}
+
+func (a *App) initServices(_ context.Context) error {
+	if a.serviceProvider == nil {
+		services := service.New(a.repository)
+		a.serviceProvider = services
+	}
+
+	return nil
+}
+
+func (a *App) initHTTPServer(_ context.Context) error {
+	if a.httpServer == nil {
+		router := routes.New(a.config, a.logger, a.serviceProvider)
+
+		a.httpServer = &http.Server{
+			Addr:         fmt.Sprintf(":%d", a.config.ServerPort),
+			Handler:      router.CreateHttpRouter(),
+			IdleTimeout:  time.Minute,
+			ReadTimeout:  20 * time.Second,
+			WriteTimeout: 30 * time.Second,
+		}
+	}
+
+	return nil
+
+}
+
+func (a *App) Run(ctx context.Context) error {
+	logger := a.logger.Logger
 
 	clsr := &closer.Closer{}
 
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.ServerPort),
-		Handler:      router.CreateHttpRouter(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 20 * time.Second,
-	}
-
-	clsr.Add(srv.Shutdown)
+	clsr.Add(a.httpServer.Shutdown)
 
 	// Cleanup function
 	clsr.Add(func(ctx context.Context) error {
@@ -61,19 +137,19 @@ func Start(ctx context.Context) error {
 	})
 
 	go func() {
-		if err = srv.ListenAndServe(); err != nil && !errors.Is(http.ErrServerClosed, err) {
+		if err := a.httpServer.ListenAndServe(); err != nil && !errors.Is(http.ErrServerClosed, err) {
 			logger.Fatal().Err(err).Msgf("failed to start server %v", err)
 		}
 	}()
 
-	logger.Info().Msgf("Listening server on port %d", cfg.ServerPort)
+	logger.Info().Msgf("Listening server on port %d", a.config.ServerPort)
 	<-ctx.Done()
 	logger.Info().Msg("Shutting down server gracefully")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
-	if err = clsr.Close(shutdownCtx); err != nil {
+	if err := clsr.Close(shutdownCtx); err != nil {
 		return fmt.Errorf("closer: %v", err)
 	}
 

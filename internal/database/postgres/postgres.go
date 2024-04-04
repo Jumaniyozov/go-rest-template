@@ -6,16 +6,10 @@ import (
 	"github.com/Jumaniyozov/go-rest-template/internal/database/entities"
 	db "github.com/Jumaniyozov/go-rest-template/internal/database/sqlc"
 	"github.com/Jumaniyozov/go-rest-template/internal/repository"
-	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
-	"github.com/Jumaniyozov/go-rest-template/internal/repository/user"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type postgresDB struct {
-	entity *entities.Entities
-}
-
-func New(cfg *config.Config) (repository.RepositoryI, error) {
+func New(cfg *config.Config) (*repository.Repository, error) {
 	dbpool, err := pgxpool.New(context.Background(), cfg.DbUrl)
 	if err != nil {
 		return nil, err
@@ -29,10 +23,5 @@ func New(cfg *config.Config) (repository.RepositoryI, error) {
 
 	e := entities.New(q)
 
-	return &postgresDB{
-		entity: e,
-	}, nil
+	return repository.New(e), nil
 }
-
-func (p *postgresDB) UserRepository() repository.User { return user.New(p.entity) }
-func (p *postgresDB) AuthRepository() repository.Auth { return auth.New(p.entity) }

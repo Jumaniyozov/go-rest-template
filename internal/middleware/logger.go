@@ -1,8 +1,8 @@
 package middlewares
 
 import (
+	"github.com/Jumaniyozov/go-rest-template/internal/logger"
 	"github.com/julienschmidt/httprouter"
-	"github.com/rs/zerolog"
 	"net/http"
 	"time"
 )
@@ -21,9 +21,10 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 	lrw.ResponseWriter.WriteHeader(code)
 }
 
-func RequestLogger(h httprouter.Handle, l *zerolog.Logger) httprouter.Handle {
+func RequestLogger(h httprouter.Handle, lgr *logger.Logger) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		start := time.Now()
+		l := lgr.Logger
 
 		lrw := newLoggingResponseWriter(w)
 

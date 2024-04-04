@@ -3,18 +3,18 @@ package user
 import (
 	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/config"
+	"github.com/Jumaniyozov/go-rest-template/internal/logger"
 	service "github.com/Jumaniyozov/go-rest-template/internal/services"
 	"github.com/Jumaniyozov/go-rest-template/pkg/response"
 	"github.com/julienschmidt/httprouter"
-	"github.com/rs/zerolog"
 	"net/http"
 )
 
 type User struct {
 	Cfg      *config.Config
-	Logger   *zerolog.Logger
+	Logger   *logger.Logger
 	Response *response.Response
-	Service  service.Service
+	Service  *service.Service
 }
 
 func (u *User) List(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {

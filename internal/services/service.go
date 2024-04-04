@@ -3,17 +3,18 @@ package service
 import (
 	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/models"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository"
 )
 
-type ServiceI struct {
+type Service struct {
 	User User
 	Auth Auth
 }
 
-func New(user User, auth Auth) *ServiceI {
-	return &ServiceI{
-		User: user,
-		Auth: auth,
+func New(repository *repository.Repository) *Service {
+	return &Service{
+		User: repository.User,
+		Auth: repository.Auth,
 	}
 }
 

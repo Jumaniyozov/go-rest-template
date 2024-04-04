@@ -27,7 +27,9 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer stop()
 
-	if err := app.Start(ctx); err != nil {
+	application := app.New()
+
+	if err := application.Run(ctx); err != nil {
 		log.Fatal(err)
 	}
 }
