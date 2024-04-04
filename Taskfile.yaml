@@ -27,6 +27,7 @@ tasks:
       - GOBIN={{.LOCAL_BIN}} go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
       - GOBIN={{.LOCAL_BIN}} go install -mod=mod google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
       - GOBIN={{.LOCAL_BIN}} go install github.com/pressly/goose/v3/cmd/goose@v3.14.0
+      - GOBIN={{.LOCAL_BIN}} go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
   get-deps:
     desc: Get dependencies
@@ -69,22 +70,22 @@ tasks:
   db/migrations/status:
     cmds:
       - echo 'Checking migration status...'
-      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose status
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} {{.LOCAL_BIN}}/goose status
 
   db/migrations/version:
     cmds:
       - echo 'Checking migration version...'
-      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose version
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} {{.LOCAL_BIN}}/goose version
 
   db/migrations/validate:
     cmds:
       - echo 'Validating migrations...'
-      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose validate
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} {{.LOCAL_BIN}}/goose validate
 
   db/migrations/fix:
     cmds:
       - echo 'Fixing migrations to sequantial order...'
-      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose fix
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} {{.LOCAL_BIN}}/goose fix
 
 
   # db/migrations/new name=$1: create a new database migration
@@ -93,13 +94,13 @@ tasks:
       vars: [ name ]
     cmds:
       - echo 'Creating migration files for ${name}...'
-      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose create {{.name}} sql
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} {{.LOCAL_BIN}}/goose create {{.name}} sql
 
   db/migrate/up:
     prompt: You are running up migrations are you sure about running them up?... Do you want to continue?
     cmds:
       - echo 'Running up migrations...'
-      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose up
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} {{.LOCAL_BIN}}/goose up
 
   db/migrate/up/to:
     prompt: You are running up migrations are you sure about running them up?... Do you want to continue?
@@ -107,13 +108,13 @@ tasks:
       vars: [ version ]
     cmds:
       - echo 'Running up migrations to version...'
-      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose up-to {{.version}}
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} {{.LOCAL_BIN}}/goose up-to {{.version}}
 
   db/migrate/down:
     prompt: You are running down migrations are you sure about running them down?... Do you want to continue?
     cmds:
       - echo 'Running down migrations...'
-      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose down
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} {{.LOCAL_BIN}}/goose down
 
   db/migrate/down/to:
     prompt: You are running down migrations are you sure about running them up?... Do you want to continue?
@@ -121,13 +122,13 @@ tasks:
       vars: [ version ]
     cmds:
       - echo 'Running down migrations to version...'
-      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} goose down-to {{.version}}
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.DB_URL}} GOOSE_MIGRATION_DIR={{.GOOSE_MIGRATION_DIR}} {{.LOCAL_BIN}}/goose down-to {{.version}}
 
 
   db/sqlc:
     cmds:
       - echo 'Generating sqlc files...'
-      - sqlc generate
+      - cwd={{.LOCAL_BIN}} {{.LOCAL_BIN}}/sqlc generate
 
 
   # vendor: tidy and vendor dependencies
@@ -148,7 +149,7 @@ tasks:
       - go vet ./...
       - staticcheck ./...
       - echo 'Running tests...'
-#      - go test -race -vet=off ./...
+  #      - go test -race -vet=off ./...
 
 
   build/api/windows:

@@ -46,8 +46,8 @@ func (a *App) initDeps(ctx context.Context) error {
 	inits := []func(context.Context) error{
 		a.initConfig,
 		a.initLogger,
-		a.initServices,
 		a.initRepository,
+		a.initServices,
 		a.initHTTPServer,
 	}
 
@@ -89,10 +89,8 @@ func (a *App) initRepository(_ context.Context) error {
 		if err != nil {
 			return fmt.Errorf("repository: %v", err)
 		}
-
 		a.repository = rep
 	}
-
 	return nil
 }
 

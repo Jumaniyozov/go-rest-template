@@ -17,7 +17,7 @@ type User struct {
 	Service  *service.Service
 }
 
-func (u *User) List(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (u *User) List(w http.ResponseWriter, r *http.Request, h httprouter.Params) {
 	users, err := u.Service.User.List(context.Background())
 	if err != nil {
 		u.Response.FetchError(w, "error while fetching users")
