@@ -1,27 +1,19 @@
 package service
 
 import (
-	"context"
-	"github.com/Jumaniyozov/go-rest-template/internal/models"
 	"github.com/Jumaniyozov/go-rest-template/internal/repository"
+	"github.com/Jumaniyozov/go-rest-template/internal/services/auth"
+	"github.com/Jumaniyozov/go-rest-template/internal/services/user"
 )
 
 type Service struct {
-	User User
-	Auth Auth
+	User user.User
+	Auth auth.Auth
 }
 
 func New(repository *repository.Repository) *Service {
 	return &Service{
-		User: repository.User,
-		Auth: repository.Auth,
+		User: user.New(repository.User),
+		Auth: auth.New(repository.Auth),
 	}
-}
-
-type User interface {
-	List(ctx context.Context) ([]*models.User, error)
-}
-
-type Auth interface {
-	AllPermissions(ctx context.Context, userID int) ([]models.Permissions, error)
 }

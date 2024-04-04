@@ -3,15 +3,18 @@ package user
 import (
 	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/models"
-	"github.com/Jumaniyozov/go-rest-template/internal/repository"
-	service "github.com/Jumaniyozov/go-rest-template/internal/services"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository/user"
 )
 
-type userService struct {
-	repo repository.User
+type User interface {
+	List(ctx context.Context) ([]*models.User, error)
 }
 
-func New(r repository.User) service.User {
+type userService struct {
+	repo user.User
+}
+
+func New(r user.User) User {
 	return &userService{
 		repo: r,
 	}

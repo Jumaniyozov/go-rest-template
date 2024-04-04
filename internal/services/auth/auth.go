@@ -3,14 +3,18 @@ package auth
 import (
 	"context"
 	"github.com/Jumaniyozov/go-rest-template/internal/models"
-	"github.com/Jumaniyozov/go-rest-template/internal/repository"
+	"github.com/Jumaniyozov/go-rest-template/internal/repository/auth"
 )
 
-type authService struct {
-	repo repository.Auth
+type Auth interface {
+	AllPermissions(ctx context.Context, userID int) ([]models.Permissions, error)
 }
 
-func New(r repository.Auth) repository.Auth {
+type authService struct {
+	repo auth.Auth
+}
+
+func New(r auth.Auth) Auth {
 	return &authService{
 		repo: r,
 	}

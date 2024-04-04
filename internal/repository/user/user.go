@@ -13,17 +13,17 @@ type User interface {
 }
 
 type repo struct {
-	Entity *entities.Entities
+	entity *entities.Entities
 }
 
 func New(e *entities.Entities) User {
 	return &repo{
-		Entity: e,
+		entity: e,
 	}
 }
 
 func (u *repo) List(ctx context.Context) ([]*models.User, error) {
-	repoUsers, err := u.Entity.User.List(ctx, db.ListParams{
+	repoUsers, err := u.entity.User.List(ctx, db.ListParams{
 		Offset: 0,
 		Limit:  100,
 	})
